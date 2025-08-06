@@ -24,6 +24,7 @@ public class Servico {
     private String endereco;
 
     @ManyToOne
+    @JoinColumn(name = "secretaria_id")
     private Secretaria secretaria;
 
 }
