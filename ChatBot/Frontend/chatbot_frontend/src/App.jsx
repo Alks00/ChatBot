@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useRef } from "react"
 import "./App.css"
 
@@ -13,7 +11,7 @@ export default function ChatbotPage() {
     const [showSecretarias, setShowSecretarias] = useState(true)
     const messagesEndRef = useRef(null)
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+    const API_BASE_URL = "http://localhost:8080"
 
     useEffect(() => {
         fetchSecretarias()
