@@ -25,7 +25,7 @@ export default function ChatbotPage() {
         if (secretarias.length > 0 && messages.length === 0) {
             const welcomeMessage = {
                 id: 1,
-                text: `Olá! Sou seu assistente virtual. Encontrei ${secretarias.length} secretarias disponíveis. Como posso ajudá-lo hoje?`,
+                text: `Temos ${secretarias.length} secretarias disponíveis. Clique em uma para ver os serviços.`,
                 isUser: false,
                 timestamp: new Date(),
             }
@@ -60,27 +60,6 @@ export default function ChatbotPage() {
         } catch (error) {
             console.error("Erro ao buscar secretarias:", error)
             setApiError(`Erro ao conectar com o servidor: ${error instanceof Error ? error.message : "Erro desconhecido"}`)
-
-            setSecretarias([
-                {
-                    id: 1,
-                    nome: "Secretaria de Educação",
-                    descricao: "Responsável pela educação municipal",
-                    endereco: "Rua da Educação, 123 - Centro",
-                },
-                {
-                    id: 2,
-                    nome: "Secretaria de Saúde",
-                    descricao: "Cuidados com a saúde pública",
-                    endereco: "Av. da Saúde, 456 - Centro",
-                },
-                {
-                    id: 3,
-                    nome: "Secretaria de Obras",
-                    descricao: "Infraestrutura e obras públicas",
-                    endereco: "Rua das Obras, 789 - Industrial",
-                },
-            ])
         }
     }
 
@@ -90,66 +69,60 @@ export default function ChatbotPage() {
 
     const simulateTyping = () => {
         setIsTyping(true)
-        setTimeout(
-            () => {
-                setIsTyping(false)
-            },
-            1000 + Math.random() * 2000,
-        )
+        setTimeout(() => {
+            setIsTyping(false)
+        }, 1000 + Math.random() * 2000)
+    }
+
+    // 🔹 Nova função: buscar serviços de uma secretaria
+    const fetchServicosPorSecretaria = async (secretaria) => {
+        setIsLoading(true)
+        simulateTyping()
+        try {
+            const response = await fetch(`${API_BASE_URL}/chatbot/${secretaria.id}`)
+            const data = await response.json()
+
+            const userMessage = {
+                id: Date.now(),
+                text: `Quero informações sobre a ${secretaria.nome}`,
+                isUser: true,
+                timestamp: new Date(),
+            }
+
+            const botMessage = {
+                id: Date.now() + 1,
+                text:
+                    data && data.length > 0
+                        ? `A ${secretaria.nome} oferece os seguintes serviços: \n${data.map((s) => `- ${s.nome}`).join("\n")}`
+                        : `Nenhum serviço encontrado para a ${secretaria.nome}.`,
+                isUser: false,
+                timestamp: new Date(),
+            }
+
+            setMessages((prev) => [...prev, userMessage, botMessage])
+        } catch (error) {
+            console.error("Erro ao buscar serviços:", error)
+            setMessages((prev) => [
+                ...prev,
+                { id: Date.now(), text: "Erro ao buscar serviços. Tente novamente.", isUser: false, timestamp: new Date() },
+            ])
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const generateResponse = (userMessage) => {
         const lowerMessage = userMessage.toLowerCase()
 
-        if (lowerMessage.includes("secretaria") || lowerMessage.includes("departamento")) {
+        if (lowerMessage.includes("secretaria")) {
             if (secretarias.length > 0) {
-                const secretariasList = secretarias.map((s) => `${s.nome} (${s.endereco})`).join("; ")
-                return `Temos ${secretarias.length} secretarias disponíveis: ${secretariasList}. Sobre qual delas você gostaria de saber mais?`
+                const secretariasList = secretarias.map((s) => `${s.nome}`).join("; ")
+                return `Temos ${secretarias.length} secretarias disponíveis: ${secretariasList}.`
             }
             return "Estou buscando informações sobre as secretarias disponíveis..."
         }
 
-        if (
-            lowerMessage.includes("endereço") ||
-            lowerMessage.includes("endereco") ||
-            lowerMessage.includes("localização")
-        ) {
-            if (secretarias.length > 0) {
-                const enderecos = secretarias.map((s) => `${s.nome}: ${s.endereco}`).join("; ")
-                return `Aqui estão os endereços das secretarias: ${enderecos}`
-            }
-            return "Não consegui carregar os endereços no momento."
-        }
-
-        const secretariaEncontrada = secretarias.find(
-            (s) =>
-                lowerMessage.includes(s.nome.toLowerCase()) ||
-                s.nome.toLowerCase().includes(lowerMessage.replace("secretaria de ", "").replace("secretaria ", "")),
-        )
-
-        if (secretariaEncontrada) {
-            return `${secretariaEncontrada.nome}: ${secretariaEncontrada.descricao || "Informações não disponíveis"}. Endereço: ${secretariaEncontrada.endereco}${secretariaEncontrada.servico && secretariaEncontrada.servico.length > 0 ? `. Serviços: ${secretariaEncontrada.servico.map((s) => s.nome).join(", ")}` : ""}`
-        }
-
-        if (lowerMessage.includes("horário") || lowerMessage.includes("funcionamento")) {
-            return "O horário de funcionamento é de segunda a sexta-feira, das 8h às 17h."
-        }
-
-        if (lowerMessage.includes("contato") || lowerMessage.includes("telefone")) {
-            return "Para mais informações, você pode entrar em contato pelo telefone (11) 1234-5678 ou pelo email contato@exemplo.com"
-        }
-
-        if (lowerMessage.includes("ajuda") || lowerMessage.includes("help")) {
-            return "Posso ajudá-lo com informações sobre secretarias, endereços, horários de funcionamento, contatos e serviços disponíveis. O que você gostaria de saber?"
-        }
-
-        if (lowerMessage.includes("erro") || lowerMessage.includes("problema")) {
-            return apiError
-                ? `Detectei um problema de conexão: ${apiError}. Estou usando dados de exemplo para demonstração.`
-                : "Não há problemas detectados no momento. Como posso ajudá-lo?"
-        }
-
-        return "Obrigado pela sua mensagem! Como posso ajudá-lo melhor? Você pode perguntar sobre secretarias específicas, endereços, horários ou contatos."
+        return "Obrigado pela sua mensagem! Você pode clicar em uma secretaria abaixo para ver seus serviços."
     }
 
     const handleSendMessage = async () => {
@@ -167,20 +140,17 @@ export default function ChatbotPage() {
         setIsLoading(true)
         simulateTyping()
 
-        setTimeout(
-            () => {
-                const botResponse = {
-                    id: Date.now() + 1,
-                    text: generateResponse(inputValue),
-                    isUser: false,
-                    timestamp: new Date(),
-                }
+        setTimeout(() => {
+            const botResponse = {
+                id: Date.now() + 1,
+                text: generateResponse(inputValue),
+                isUser: false,
+                timestamp: new Date(),
+            }
 
-                setMessages((prev) => [...prev, botResponse])
-                setIsLoading(false)
-            },
-            1500 + Math.random() * 1000,
-        )
+            setMessages((prev) => [...prev, botResponse])
+            setIsLoading(false)
+        }, 1500 + Math.random() * 1000)
     }
 
     const handleKeyPress = (e) => {
@@ -199,14 +169,16 @@ export default function ChatbotPage() {
                     </div>
                     <div className="header-info">
                         <h1>Assistente Virtual</h1>
-                        <span className={`status ${apiError ? "offline" : "online"}`}>{apiError ? "Modo Demo" : "Online"}</span>
+                        <span className={`status ${apiError ? "offline" : "online"}`}>
+                            {apiError ? "Modo Demo" : "Online"}
+                        </span>
                     </div>
                     <button
                         className="toggle-secretarias"
                         onClick={() => setShowSecretarias(!showSecretarias)}
                         title={showSecretarias ? "Ocultar secretarias" : "Mostrar secretarias"}
                     >
-                        {showSecretarias ? "📋" : "📋"}
+                        📋
                     </button>
                 </div>
             </div>
@@ -227,15 +199,14 @@ export default function ChatbotPage() {
                     </div>
                     <div className="secretarias-grid">
                         {secretarias.map((secretaria) => (
-                            <div key={secretaria.id} className="secretaria-card">
+                            <div
+                                key={secretaria.id}
+                                className="secretaria-card cursor-pointer hover:bg-gray-100"
+                                onClick={() => fetchServicosPorSecretaria(secretaria)} // 🔹 clique chama API
+                            >
                                 <h4>{secretaria.nome}</h4>
                                 {secretaria.descricao && <p className="descricao">{secretaria.descricao}</p>}
                                 <p className="endereco">📍 {secretaria.endereco}</p>
-                                {secretaria.servico && secretaria.servico.length > 0 && (
-                                    <div className="servicos">
-                                        <span>Serviços: {secretaria.servico.map((s) => s.nome).join(", ")}</span>
-                                    </div>
-                                )}
                             </div>
                         ))}
                     </div>
@@ -248,11 +219,11 @@ export default function ChatbotPage() {
                         <div className="message-content">
                             <p>{message.text}</p>
                             <span className="message-time">
-                {message.timestamp.toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                })}
-              </span>
+                                {message.timestamp.toLocaleTimeString("pt-BR", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -270,22 +241,6 @@ export default function ChatbotPage() {
                 )}
 
                 <div ref={messagesEndRef} />
-            </div>
-
-            <div className="chatbot-input">
-                <div className="input-container">
-          <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Digite sua mensagem..."
-              rows={1}
-              disabled={isLoading}
-          />
-                    <button onClick={handleSendMessage} disabled={!inputValue.trim() || isLoading} className="send-button">
-                        <span>📤</span>
-                    </button>
-                </div>
             </div>
         </div>
     )
