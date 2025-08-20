@@ -1,5 +1,6 @@
 package backend.chatbot.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,5 +29,6 @@ public class Secretaria {
     private String endereco;
 
     @OneToMany
+    @JsonManagedReference
     private List<Servico> servico;
 }
