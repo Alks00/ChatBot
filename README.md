@@ -22,8 +22,6 @@ O objetivo do projeto é facilitar a comunicação entre cidadãos e secretarias
 
 ---
 
-## 🛠️ Como Executar
-
 ### Backend
 1. Acesse a pasta **Backend**.  
 2. Execute a classe **`ChatbotApplication.java`**.  
