@@ -1,3 +1,11 @@
+ul {
+  padding-inline-start: 0px;
+}
+
+li {
+  list-style-type: none;
+}
+
 .chatbot-container {
   display: flex;
   flex-direction: column;
@@ -217,9 +225,15 @@
   margin-top: 8px;
 }
 
+.serv-info {
+  box-shadow: 0px 0px 4px 2px #667eea;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 5px 10px;
+}
+
 .chatbot-messages {
   bottom: 0;
-  width: 94.5%;
   height: 100px;
   overflow-y: auto;
   flex: 1;
@@ -247,6 +261,7 @@
   border-radius: 18px;
   position: relative;
   word-wrap: break-word;
+  white-space: pre-line;
 }
 
 .user-message .message-content {

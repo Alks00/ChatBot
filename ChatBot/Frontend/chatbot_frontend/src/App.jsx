@@ -74,7 +74,6 @@ export default function ChatbotPage() {
         }, 1000 + Math.random() * 2000)
     }
 
-    // 🔹 Nova função: buscar serviços de uma secretaria
     const fetchServicosPorSecretaria = async (secretaria) => {
         setIsLoading(true)
         simulateTyping()
@@ -92,9 +91,23 @@ export default function ChatbotPage() {
             const botMessage = {
                 id: Date.now() + 1,
                 text:
-                    data && data.length > 0
-                        ? `A ${secretaria.nome} oferece os seguintes serviços: \n${data.map((s) => `- ${s.nome}`).join("\n")}`
-                        : `Nenhum serviço encontrado para a ${secretaria.nome}.`,
+                    data && data.length > 0 ? (
+                        <div>
+                        <p>A {secretaria.nome} oferece os seguintes serviços:</p>
+                        <ul>
+                        {data.map((s) => (
+                            <li className="serv-info">
+                            <strong>{s.nome}</strong> <br />
+                            {s.endereco} <br />
+                            {s.descricao} <br />
+                            {s.telefone} 
+                            </li>
+                        ))}
+                        </ul>
+                    </div>
+                ) : (
+                <p>Nenhum serviço encontrado para a {secretaria.nome}.</p>
+                ),
                 isUser: false,
                 timestamp: new Date(),
             }
@@ -168,7 +181,7 @@ export default function ChatbotPage() {
                         <span>🤖</span>
                     </div>
                     <div className="header-info">
-                        <h1>Assistente Virtual</h1>
+                        <h1>Conchalina</h1>
                         <span className={`status ${apiError ? "offline" : "online"}`}>
                             {apiError ? "Modo Demo" : "Online"}
                         </span>
@@ -202,7 +215,7 @@ export default function ChatbotPage() {
                             <div
                                 key={secretaria.id}
                                 className="secretaria-card cursor-pointer hover:bg-gray-100"
-                                onClick={() => fetchServicosPorSecretaria(secretaria)} // 🔹 clique chama API
+                                onClick={() => fetchServicosPorSecretaria(secretaria) && setShowSecretarias(!showSecretarias)}
                             >
                                 <h4>{secretaria.nome}</h4>
                                 {secretaria.descricao && <p className="descricao">{secretaria.descricao}</p>}
