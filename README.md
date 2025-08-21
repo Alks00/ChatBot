@@ -19,6 +19,9 @@ O objetivo do projeto é facilitar a comunicação entre cidadãos e secretarias
 - ⚙️ **Spring Boot** → Backend
 - 🎨 **React (Vite)** → Frontend
 - 🗄️ **PostgreSQL** → Banco de Dados
+---
+
+## 🛠️ Como Executar
 
 ---
 
@@ -27,9 +30,6 @@ O objetivo do projeto é facilitar a comunicação entre cidadãos e secretarias
 2. Execute a classe **`ChatbotApplication.java`**.  
 3. O backend será iniciado junto com o banco de dados para integração com o frontend.
 
----
-
-## 🛠️ Como Executar
 
 ---
 
